@@ -9,6 +9,15 @@ html,
   box-sizing: border-box;
 }
 
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 .wrapper {
   width: 100%;
   height: 100%;
@@ -21,7 +30,6 @@ html,
 .board {
   height: 496px;
   border-radius: 5px;
-  border: 1px solid red;
   width: 496px;
   background-color: #abc;
 }
@@ -33,13 +41,17 @@ table {
 
 td {
   box-shadow: 0px 0px 0px 1px black;
+  display: table-cell;
+  /* vertical-align: middle; */
 }
-
 .oddCol {
   background-color: #fbfbfb;
 }
 .evenCol {
   background-color: rgb(173, 204, 235);
+}
+.selCol {
+  background-color: rgba(125, 125, 125, 0.5);
 }
 .evenCol,
 .oddCol {
@@ -47,14 +59,14 @@ td {
   position: relative;
 }
 .piece {
-  width: 30px;
+  width: 100%;
+  height: 100%;
   z-index: 10;
-  top: 25%;
-  left: 25%;
   cursor: pointer;
-  height: 30px;
+  background-size: 100% 100%;
   color: white;
-  border: 1px solid blue;
-  background-color: black;
-  position: absolute;
+  /* border: 1px solid blue; */
+  background-color: transparent;
+  /* position: absolute; */
+  position: relative;
 }
