@@ -1,274 +1,271 @@
-import { type } from "os";
-import React, { useEffect, useRef, useState } from "react";
-import { Children } from "react";
-import { createNoSubstitutionTemplateLiteral } from "typescript";
-import "./App.css";
-import { Pieces, make_array, chessPiece } from "./moves";
-import { useAllRefs } from "./useAllRefs";
+import { type } from 'os';
+import React, { useEffect, useRef, useState } from 'react';
+import { Children } from 'react';
+import './App.css';
+import { Pieces, side_finder, piece_loc, make_array, chessPiece, get_mapping, get_mapping_helper, stop_mate } from './moves';
+import { useAllRefs } from './useAllRefs';
 
 interface pos {
-  childPosY: number;
-  childPosX: number;
-  loc: string;
+	childPosY: number;
+	childPosX: number;
+	loc: string;
 }
 
 type newMouseEventOnDiv = React.MouseEvent<HTMLDivElement, MouseEvent> & pos;
 
-type newMouseEventOnCell = React.MouseEvent<HTMLTableCellElement, MouseEvent> &
-  pos;
+type newMouseEventOnCell = React.MouseEvent<HTMLTableCellElement, MouseEvent> & pos;
 
 interface toTd {
-  i: boolean;
-  row: number;
-  col: number;
-  j: boolean;
-  piece: boolean;
-  children: JSX.Element | null;
+	i: boolean;
+	row: number;
+	col: number;
+	j: boolean;
+	piece: boolean;
+	children: JSX.Element | null;
 }
 
 interface toPiece {
-  thisIsARef: React.MutableRefObject<HTMLDivElement | null>;
-  name: string;
-  pieceInfo: chessPiece;
+	thisIsARef: React.MutableRefObject<HTMLDivElement | null>;
+	name: string;
+	pieceInfo: chessPiece;
 }
 
-const Piece: (props: toPiece) => JSX.Element = ({
-  thisIsARef,
-  name,
-  pieceInfo,
-}) => {
-  const clickedRef = useRef<true | false>(false);
-  const src = `${pieceInfo.side}${name[0]}`.toLowerCase();
+const Piece: (props: toPiece) => JSX.Element = ({ thisIsARef, name, pieceInfo }) => {
+	const clickedRef = useRef<true | false>(false);
+	const src = `${pieceInfo.side}${name[0]}`.toLowerCase();
 
-  return (
-    <div
-      style={{
-        backgroundImage: `url("${src}.png")`,
-      }}
-      ref={thisIsARef}
-      onMouseMove={(e) => {
-        // e.stopPropagation();
-      }}
-      className={`piece ${name}`}
-    ></div>
-  );
+	return (
+		<div
+			style={{
+				backgroundImage: `url("${src}.png")`,
+			}}
+			ref={thisIsARef}
+			onMouseMove={e => {}}
+			className={`piece ${name}`}></div>
+	);
 };
 
-const Td: (props: toTd) => JSX.Element = ({
-  row,
-  col,
-  i,
-  j,
-  piece,
-  children,
-}) => {
-  return (
-    <td
-      id={`${row}${col}`}
-      onMouseDown={(e: newMouseEventOnCell) => {
-        e.loc = e.currentTarget.id;
-        e.childPosX = e.currentTarget.getBoundingClientRect().left;
-        e.childPosY = e.currentTarget.getBoundingClientRect().top;
-        return;
-      }}
-      onMouseMove={(e: newMouseEventOnCell) => {
-        return;
-      }}
-      className={`${i !== j ? "oddCol" : "evenCol"}`}
-    >
-      {children}
-    </td>
-  );
+const Td: (props: toTd) => JSX.Element = ({ row, col, i, j, piece, children }) => {
+	return (
+		<td
+			id={`${row}${col}`}
+			onMouseDown={(e: newMouseEventOnCell) => {
+				e.loc = e.currentTarget.id;
+				e.childPosX = e.currentTarget.getBoundingClientRect().left;
+				e.childPosY = e.currentTarget.getBoundingClientRect().top;
+				return;
+			}}
+			onMouseMove={(e: newMouseEventOnCell) => {
+				return;
+			}}
+			className={`${i !== j ? 'oddCol' : 'evenCol'}`}>
+			{children}
+		</td>
+	);
 };
 
 const initBoard: Array<Array<string>> = [];
-make_array(8).forEach((ele) => {
-  initBoard.push(make_array(8));
+make_array(8).forEach(ele => {
+	initBoard.push(make_array(8));
 });
 for (let i in Pieces) {
-  let [x, y] = Pieces[i].cur_coords();
-  initBoard[7 - y][x] = Pieces[i].name;
+	let [x, y] = Pieces[i].cur_coords();
+	initBoard[7 - y][x] = Pieces[i].name;
 }
 
+const check4mate = async (
+	name: string,
+	board: Array<Array<string>>,
+	setBoard: React.Dispatch<React.SetStateAction<string[][]>>,
+	setTurn: React.Dispatch<React.SetStateAction<string>>
+): Promise<boolean> => {
+	let before_move = get_mapping_helper(board, name);
+	if (before_move) {
+		return false;
+	}
+	let res = stop_mate(side_finder(name), board);
+	if (!res) {
+		setBoard(initBoard);
+		for (let i in Pieces) {
+			if (i[0] === 'P') {
+				(Pieces[i] as any).first_move = true;
+			}
+		}
+		setTurn('W');
+		return true;
+	}
+	return false;
+};
+
 const ChessBoard = () => {
-  const [board, setBoard] = useState<Array<Array<string>>>(initBoard);
-  const [turn, setTurn] = useState<string>("W");
-  const Refs = useAllRefs();
-  const parentInfoRef = useRef<null | {
-    x: number;
-    y: number;
-    name: string;
-    loc: string;
-    dropLoc: string[];
-  }>(null);
-  const clickedRef = useRef<false | true>(false);
-  let a = [0, 1, 2, 3, 4, 5, 6, 7];
-  return (
-    <div
-      onMouseDown={(e: newMouseEventOnDiv) => {
-        const list = Array.from((e.target as HTMLDivElement).classList);
+	const [board, setBoard] = useState<Array<Array<string>>>(initBoard);
+	const [turn, setTurn] = useState<string>('W');
+	const Refs = useAllRefs();
+	const parentInfoRef = useRef<null | {
+		x: number;
+		y: number;
+		name: string;
+		loc: string;
+		dropLoc: string[];
+	}>(null);
+	const clickedRef = useRef<false | true>(false);
 
-        if (!list.includes("piece")) return;
-        const name = list[1];
-        if (Pieces[name].side !== turn) return;
-        const targetRef = Refs[name];
+	useEffect(() => {
+		(async () => {
+			let check_white = await check4mate('K1', board, setBoard, setTurn);
+			if (check_white) {
+				alert('Checkmate.  Black wins.');
+				return;
+			}
+			let check_black = await check4mate('K2', board, setBoard, setTurn);
+			if (check_black) {
+				alert('Checkmate.  White wins.');
+				return;
+			}
+		})();
+	});
 
-        if (targetRef.current !== null) {
-          targetRef.current.style.zIndex = "100";
-          targetRef.current.style.transform = `translateX(${
-            e.clientX - 15 - e.childPosX
-          }px) translateY(${e.clientY - 15 - e.childPosY}px)`;
+	let a = [0, 1, 2, 3, 4, 5, 6, 7];
+	return (
+		<div
+			onMouseDown={(e: newMouseEventOnDiv) => {
+				const list = Array.from((e.target as HTMLDivElement).classList);
 
-          let dropLocations = (Pieces[name] as any).finder(
-            board,
-            Number(e.loc[0]),
-            Number(e.loc[1])
-          );
+				if (!list.includes('piece')) return;
+				const name = list[1];
+				if (Pieces[name].side !== turn) return;
+				const targetRef = Refs[name];
 
-          let processed: string[] = dropLocations.reduce(
-            (acc: [], cur: number[][], i: number) => {
-              return [
-                ...acc,
-                ...cur.map((ele: number[]) => {
-                  return ele.join("");
-                }),
-              ];
-            },
-            []
-          );
+				if (targetRef.current !== null) {
+					targetRef.current.style.zIndex = '100';
+					targetRef.current.style.transform = `translateX(${e.clientX - 15 - e.childPosX}px) translateY(${e.clientY - 15 - e.childPosY}px)`;
 
-          clickedRef.current = true;
-          parentInfoRef.current = {
-            x: e.childPosX,
-            y: e.childPosY,
-            loc: e.loc,
-            name: Array.from((e.target as HTMLDivElement).classList)[1],
-            dropLoc: processed,
-          };
+					let dropLocations = (Pieces[name] as any).finder(board, Number(e.loc[0]), Number(e.loc[1]));
 
-          for (let j of processed) {
-            let x = document.getElementById(j);
-            if (x !== null) {
-              x.classList.add("selCol");
-            }
-          }
-        }
-      }}
-      onMouseUp={(e) => {
-        if (clickedRef.current === false || parentInfoRef.current === null)
-          return;
+					let processed: string[] = dropLocations.reduce((acc: [], cur: number[][], i: number) => {
+						return [
+							...acc,
+							...cur.map((ele: number[]) => {
+								return ele.join('');
+							}),
+						];
+					}, []);
 
-        const { name, dropLoc } = parentInfoRef.current;
-        const targetRef = Refs[name];
-        let dropTarget: any = null;
-        Array.from(document.elementsFromPoint(e.clientX, e.clientY)).forEach(
-          (ele) => {
-            if (dropTarget !== null) return;
-            if (ele.nodeName === "TD") dropTarget = ele;
-          }
-        );
+					clickedRef.current = true;
+					parentInfoRef.current = {
+						x: e.childPosX,
+						y: e.childPosY,
+						loc: e.loc,
+						name: Array.from((e.target as HTMLDivElement).classList)[1],
+						dropLoc: processed,
+					};
 
-        let skip = false;
-        if (dropTarget !== null && dropLoc.includes(dropTarget.id)) {
-          let x = Number(dropTarget.id[1]),
-            y = Number(dropTarget.id[0]);
-          if (board[x][y][0] === "K") {
-            if (board[x][y][1] === "1") alert("White wins");
-            else alert("Black wins");
-            setBoard(initBoard);
-            setTurn("W");
-            skip = true;
-          }
+					for (let j of processed) {
+						let x = document.getElementById(j);
+						if (x !== null) {
+							x.classList.add('selCol');
+						}
+					}
+				}
+			}}
+			onMouseUp={e => {
+				if (clickedRef.current === false || parentInfoRef.current === null) return;
 
-          if (!skip) {
-            let tboard = JSON.parse(JSON.stringify(board));
-            for (let i = 0; i < tboard.length; i++) {
-              for (let j = 0; j < tboard[0].length; j++) {
-                if (tboard[i][j] === name) {
-                  tboard[i][j] = "";
-                  break;
-                }
-              }
-            }
-            tboard[Number(dropTarget.id[1])][Number(dropTarget.id[0])] = name;
-            if (name[0] === "P") {
-              if ("first_move" in Pieces[name])
-                (Pieces[name] as any).first_move = false;
-            }
-            setBoard(tboard);
-            setTurn((p) => (p === "W" ? "B" : "W"));
-          }
-        } else if (targetRef.current !== null) {
-          targetRef.current.style.zIndex = "10";
-          targetRef.current.style.transform = ``;
-        }
+				const { name, dropLoc, loc } = parentInfoRef.current;
+				const targetRef = Refs[name];
+				let dropTarget: any = null;
+				Array.from(document.elementsFromPoint(e.clientX, e.clientY)).forEach(ele => {
+					if (dropTarget !== null) return;
+					if (ele.nodeName === 'TD') dropTarget = ele;
+				});
 
-        for (let j of dropLoc) {
-          let x = document.getElementById(j);
-          if (x !== null) {
-            x.classList.remove("selCol");
-          }
-        }
+				drop_target: {
+					if (dropTarget !== null && dropLoc.includes(dropTarget.id)) {
+						let x = Number(dropTarget.id[1]);
+						let y = Number(dropTarget.id[0]);
+						let tboard = JSON.parse(JSON.stringify(board));
 
-        clickedRef.current = false;
-        parentInfoRef.current = null;
-      }}
-      onMouseMove={(e: newMouseEventOnDiv) => {
-        if (clickedRef.current === false || parentInfoRef.current === null)
-          return;
+						//check if you are in check!
+						let before_move = get_mapping_helper(board, name);
+						tboard[loc[1]][loc[0]] = '';
+						tboard[x][y] = name;
+						let after_move = get_mapping_helper(tboard, name);
 
-        const { name: pieceName, loc: pieceLoc, x, y } = parentInfoRef.current;
-        const targetRef = Refs[pieceName];
+						if (!before_move && !after_move) {
+							alert("you're in check");
+							break drop_target;
+						}
+						if (!after_move) break drop_target;
 
-        if (targetRef.current !== null) {
-          targetRef.current.style.transform = `translateX(${
-            e.clientX - 15 - x
-          }px) translateY(${e.clientY - 15 - y}px)`;
-        }
-      }}
-      className="board"
-    >
-      <table>
-        <tbody>
-          {a.map((i) => (
-            <tr>
-              {a.map((j) => {
-                let pieceRN = null;
-                if (board[i][j] !== "")
-                  pieceRN = (
-                    <Piece
-                      pieceInfo={Pieces[board[i][j]]}
-                      name={`${board[i][j]}`}
-                      thisIsARef={Refs[`${board[i][j]}`]}
-                    />
-                  );
+						//check if you can take king...
+						if (board[x][y][0] === 'K') {
+							if (board[x][y][1] === '1') alert('White wins');
+							else alert('Black wins');
+							setBoard(initBoard);
+							setTurn('W');
+							break drop_target;
+						}
 
-                return (
-                  <Td
-                    row={j}
-                    col={i}
-                    piece={i === 0 && j === 0}
-                    i={i % 2 === 1}
-                    j={j % 2 === 0}
-                  >
-                    {pieceRN}
-                  </Td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+						if (name[0] === 'P' && 'first_move' in Pieces[name]) (Pieces[name] as any).first_move = false;
+						setBoard(tboard);
+						setTurn(p => (p === 'W' ? 'B' : 'W'));
+					}
+				}
+
+				if (targetRef.current !== null) {
+					targetRef.current.style.zIndex = '10';
+					targetRef.current.style.transform = ``;
+				}
+
+				for (let j of dropLoc) {
+					let x = document.getElementById(j);
+					if (x !== null) {
+						x.classList.remove('selCol');
+					}
+				}
+
+				clickedRef.current = false;
+				parentInfoRef.current = null;
+			}}
+			onMouseMove={(e: newMouseEventOnDiv) => {
+				if (clickedRef.current === false || parentInfoRef.current === null) return;
+
+				const { name: pieceName, loc: pieceLoc, x, y } = parentInfoRef.current;
+				const targetRef = Refs[pieceName];
+
+				if (targetRef.current !== null) {
+					targetRef.current.style.transform = `translateX(${e.clientX - 15 - x}px) translateY(${e.clientY - 15 - y}px)`;
+				}
+			}}
+			className="board">
+			<table>
+				<tbody>
+					{a.map(i => (
+						<tr>
+							{a.map(j => {
+								let pieceRN = null;
+								if (board[i][j] !== '') pieceRN = <Piece pieceInfo={Pieces[board[i][j]]} name={`${board[i][j]}`} thisIsARef={Refs[`${board[i][j]}`]} />;
+
+								return (
+									<Td row={j} col={i} piece={i === 0 && j === 0} i={i % 2 === 1} j={j % 2 === 0}>
+										{pieceRN}
+									</Td>
+								);
+							})}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	);
 };
 
 const App = () => {
-  return (
-    <div className="wrapper">
-      <ChessBoard />
-    </div>
-  );
+	return (
+		<div className="wrapper">
+			<ChessBoard />
+		</div>
+	);
 };
 
 export default App;
