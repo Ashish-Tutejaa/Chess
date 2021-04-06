@@ -1,9 +1,11 @@
 import { type } from 'os';
-import React, { useEffect, useRef, useState } from 'react';
-import { Children } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { Pieces, side_finder, piece_loc, make_array, chessPiece, get_mapping, get_mapping_helper, stop_mate } from './moves';
 import { useAllRefs } from './useAllRefs';
+import SideBar from './SideBar';
+import GameController from './GameController';
+import { UserContext } from './Auth';
 
 interface pos {
 	childPosY: number;
@@ -260,10 +262,22 @@ const ChessBoard = () => {
 	);
 };
 
-const App = () => {
+const App: (props: {}) => JSX.Element = () => {
+	const [page, setPage] = useState<number>(0);
+
+	const user = useContext(UserContext);
+
+	const Pages: { [props: string]: () => JSX.Element } = {
+		0: ChessBoard,
+		1: GameController,
+	};
+
+	const RenderThis = Pages[page];
+
 	return (
 		<div className="wrapper">
-			<ChessBoard />
+			<SideBar remote={setPage} username={user.username} />
+			{<RenderThis />}
 		</div>
 	);
 };

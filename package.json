@@ -1,43 +1,27 @@
 {
-  "name": "app",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.11.9",
-    "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^12.7.1",
-    "@types/jest": "^26.0.20",
-    "@types/node": "^12.20.1",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^17.0.1",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "4.0.2",
-    "typescript": "^4.1.5",
-    "web-vitals": "^1.1.0"
-  },
+  "name": "chess",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cd api && tsc-watch --onSuccess \"node ./dist/app.js\""
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/cookie-parser": "^1.4.2",
+    "@types/express": "^4.17.11",
+    "@types/mongoose": "^5.10.4",
+    "@types/node": "^14.14.37",
+    "@types/ws": "^7.4.1",
+    "cookie-parser": "^1.4.5",
+    "create-react-app": "^4.0.2",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.3",
+    "tsc-watch": "^4.2.9",
+    "typescript": "^4.2.3",
+    "ws": "^7.4.4"
   }
 }
