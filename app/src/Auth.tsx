@@ -119,6 +119,8 @@ const StyledUserForm = styled(UserForm)<toUserForm>`
 	align-items: center;
 	font-family: 'Open Sans', sans-serif;
 	font-size: 1.1rem;
+	background: ${props => props.theme.colors.bgLIGHT};
+	color: white;
 	& h1 {
 		margin-top: 10%;
 		margin-bottom: 50px;

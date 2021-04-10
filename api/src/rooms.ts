@@ -1,5 +1,3 @@
-import express, { Router } from 'express';
+const messageHandler = () => {};
 
-const roomsRouter: Router = express.Router();
-
-export default roomsRouter;
+export default messageHandler;

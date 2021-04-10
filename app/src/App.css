@@ -28,6 +28,7 @@ html,
 	justify-content: center;
 	align-items: center;
 	position: relative;
+	background: #393e46;
 }
 
 .board {
@@ -45,6 +46,8 @@ table {
 td {
 	box-shadow: 0px 0px 0px 1px black;
 	display: table-cell;
+	height: 58px;
+	width: 58px;
 	/* vertical-align: middle; */
 }
 .oddCol {

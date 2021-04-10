@@ -5,6 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const roomSchema = new mongoose_1.default.Schema({
+    rid: {
+        type: String,
+        required: true,
+    },
     user1: {
         type: String,
         default: '',
@@ -12,6 +16,14 @@ const roomSchema = new mongoose_1.default.Schema({
     user2: {
         type: String,
         default: '',
+    },
+    time: {
+        type: String,
+        required: true,
+    },
+    side: {
+        type: String,
+        required: true,
     },
 });
 const roomModel = mongoose_1.default.model('room', roomSchema);

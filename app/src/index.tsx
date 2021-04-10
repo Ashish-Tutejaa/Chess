@@ -3,12 +3,16 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import Auth from './Auth';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme';
 
 ReactDOM.render(
 	<React.StrictMode>
-		<Auth>
-			<App />
-		</Auth>
+		<ThemeProvider theme={theme}>
+			<Auth>
+				<App />
+			</Auth>
+		</ThemeProvider>
 	</React.StrictMode>,
 	document.getElementById('root')
 );
