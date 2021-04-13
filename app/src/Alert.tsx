@@ -38,6 +38,7 @@ const StyledAlert = styled('div')<{ timer: number }>`
 	right: 10px;
 	width: 200px;
 	height: 75px;
+	height: fit-content;
 	padding: 10px;
 	font-size: 1rem;
 	box-shadow: 0px 0px 0px 1px white;
@@ -60,13 +61,15 @@ const StyledAlert = styled('div')<{ timer: number }>`
 		width: 5px;
 		background: ${props => props.theme.colors.fgCOL};
 		transform-origin: left top;
-		animation: ${invisBefore} ${props => props.timer}000ms 0ms 1 normal ease-in-out forwards;
+		/* animation: ${invisBefore} ${props => props.timer}000ms 0ms 1 normal ease-in-out forwards; */
 	}
 	animation: ${invis} ${props => props.timer}000ms 0ms 1 normal ease-in-out forwards;
 `;
 
 const Alert: (props: toAlert) => null | JSX.Element = ({ options, className }) => {
 	const [show, setShow] = useState<number>(0);
+
+	let randomKey = useMemo(() => Math.floor(Math.random() * 100), [options]);
 
 	useEffect(() => {
 		console.log('reseting to 0');
@@ -76,7 +79,7 @@ const Alert: (props: toAlert) => null | JSX.Element = ({ options, className }) =
 	if (options === null || show === 1) return null;
 
 	return (
-		<div onClick={() => setShow(1)} key={Math.random()} className="alert-wrapper">
+		<div onClick={() => setShow(1)} key={randomKey} className="alert-wrapper">
 			<StyledAlert timer={options.timer}>{options.title}</StyledAlert>
 		</div>
 	);

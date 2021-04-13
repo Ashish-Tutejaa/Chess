@@ -33,8 +33,8 @@ html,
 
 .board {
 	height: 496px;
-	border-radius: 5px;
 	width: 496px;
+	border-radius: 5px;
 	background-color: #abc;
 }
 
@@ -44,11 +44,9 @@ table {
 }
 
 td {
-	box-shadow: 0px 0px 0px 1px black;
 	display: table-cell;
 	height: 58px;
 	width: 58px;
-	/* vertical-align: middle; */
 }
 .oddCol {
 	background-color: #fbfbfb;
@@ -58,6 +56,7 @@ td {
 }
 .selCol {
 	background-color: rgba(125, 125, 125, 0.5);
+	box-shadow: 0px 0px 0px 1px black;
 }
 .evenCol,
 .oddCol {

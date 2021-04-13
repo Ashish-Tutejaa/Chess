@@ -1,23 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BiLoaderAlt } from 'react-icons/bi';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import Alert from './Alert';
+import { StyledButton, StyledLoader } from './shared/Styles';
 
 export const UserContext = React.createContext<{ username: string }>({ username: '&007' });
 
-const StyledButton = styled('button')`
-	background: white;
-	width: 60px;
-	height: 30px;
-	margin-top: 15px;
-	outline: none;
-	border: 0px;
-	cursor: pointer;
-	color: white;
-	background: #17a2b8;
-	border-radius: 5px;
-	font-size: 1rem;
-	font-weight: bold;
+const rotate = keyframes`
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
 `;
 
 interface toUserForm {
@@ -64,10 +59,19 @@ const UserForm: (props: toUserForm) => JSX.Element = ({ redirect, className, use
 	const handleUserClick = async () => {
 		setLoad(1);
 		setTimeout(async () => {
+			if (inputRef.current) {
+				let len = inputRef.current.value.length;
+				if (len < 3) {
+					setErr({ timer: 5, title: `Username must be atleast 3 characters` });
+					setLoad(0);
+					return;
+				}
+			}
+
 			let avail = await checkUser();
 			console.log(avail);
 			if (avail) {
-				setErr({ timer: 5, title: `This Username is already taken!` });
+				setErr({ timer: 5, title: `This Username is taken already!` });
 				setLoad(0);
 				return;
 			}
@@ -105,7 +109,7 @@ const UserForm: (props: toUserForm) => JSX.Element = ({ redirect, className, use
 				}}
 				type="text"
 				placeholder=""></input>
-			<StyledButton onClick={handleUserClick}>{load === 1 ? '...' : 'Enter'}</StyledButton>
+			<StyledButton onClick={handleUserClick}>{load === 1 ? <StyledLoader /> : 'Enter'}</StyledButton>
 		</div>
 	);
 };
@@ -165,7 +169,7 @@ const Auth: (props: toAuth) => JSX.Element = ({ children }) => {
 
 			if (body.err) {
 				alertRef.current = {
-					title: body.err,
+					title: 'You must Login to Play',
 					timer: 5,
 				};
 				setStatus(1);

@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { UserContext } from './Auth';
 import { Play } from './Play';
+import { StyledLoader } from './shared/Styles';
+import { StyledRetry } from './shared/Components';
+import Alert from './Alert';
+
+const StyledLoader1 = styled(StyledLoader)`
+	color: white;
+	font-size: 3rem;
+`;
 
 interface query {
 	type: 'Create' | 'Join' | 'Play' | 'Error' | 'Move';
@@ -49,7 +57,9 @@ const StyledWrapper = styled.div`
 `;
 
 const JoinController = () => {
-	const [status, setStatus] = useState<number>(0);
+	const [err, setErr] = useState<null | { timer: number; title: string }>(null);
+	const [status, setStatus] = useState<{ page: number }>({ page: -1 });
+	const [retry, setRetry] = useState<number>(0);
 	const [code, setCode] = useState<string>('');
 	const [side, setSide] = useState<'White' | 'Black' | null>(null);
 	const socketRef = useRef<null | WebSocket>(null);
@@ -57,7 +67,16 @@ const JoinController = () => {
 	const user = useContext(UserContext);
 
 	useEffect(() => {
+		setStatus({ page: -1 });
 		const socket = new WebSocket('ws://localhost:8080');
+
+		socket.onopen = () => {
+			setStatus({ page: 0 });
+		};
+
+		socket.onclose = () => {
+			setStatus({ page: -2 });
+		};
 
 		socket.onmessage = message => {
 			console.log(message.data);
@@ -69,8 +88,13 @@ const JoinController = () => {
 				if (resp.message && ['Black', 'White', null].includes(resp.message)) {
 					setSide(resp.message as any);
 				}
-				setStatus(1);
+				setStatus({ page: 1 });
 			} else if (resp.type === 'Error') {
+				if (resp.message?.includes('disconnected')) {
+					console.log(resp);
+					setErr({ timer: 5, title: 'Opponent Disconnected' });
+					setStatus({ page: 0 });
+				}
 			} else if (resp.type === 'Move') {
 				console.log('move made', resp.message);
 				if (resp.message) {
@@ -85,7 +109,7 @@ const JoinController = () => {
 			console.log(socketRef.current);
 			if (socket.readyState < 2) socket.close(1000, 'Join unmounted');
 		};
-	}, []);
+	}, [retry]);
 
 	const joinRoom = () => {
 		if (socketRef.current) {
@@ -99,20 +123,29 @@ const JoinController = () => {
 		}
 	};
 
+	let ToRender: (() => JSX.Element) | null = null;
+
+	if (status.page === -2) {
+		ToRender = () => <StyledRetry retry={setRetry} />;
+	} else if (status.page === -1) {
+		ToRender = () => <StyledLoader1 />;
+	} else if (status.page === 0) {
+		ToRender = () => (
+			<React.Fragment>
+				<h1>Enter Game Code</h1>
+				<input value={code} onChange={e => setCode(e.target.value)} type="text" placeholder="code" />
+				<button onClick={joinRoom}>Join Game</button>
+			</React.Fragment>
+		);
+	} else if (status.page === 1) {
+		ToRender = () => <Play move={move} roomCode={code} socketRef={socketRef} side={side} />;
+	}
+
 	return (
-		<>
-			{status === 0 ? (
-				<StyledWrapper>
-					<h1>Enter Game Code</h1>
-					<input value={code} onChange={e => setCode(e.target.value)} type="text" placeholder="code" />
-					<button onClick={joinRoom}>Join Game</button>
-				</StyledWrapper>
-			) : (
-				<StyledWrapper>
-					<Play move={move} roomCode={code} socketRef={socketRef} side={side} />
-				</StyledWrapper>
-			)}
-		</>
+		<StyledWrapper>
+			<Alert options={err} />
+			{ToRender ? ToRender() : null}
+		</StyledWrapper>
 	);
 };
 

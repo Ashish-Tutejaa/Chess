@@ -17,7 +17,29 @@ wss.on('connection', function (socket, request) {
     console.log('connected...');
     socket.uid = uuid_1.v4();
     socket.on('close', async function () {
-        console.log('disconnected...');
+        console.log('disconnected...', socket.uid);
+        let room = await Promise.all([room_1.default.find({ user1: socket.uid }), room_1.default.find({ user2: socket.uid })]);
+        console.log(room);
+        let targetID = null;
+        if (room[0][0]) {
+            //user1 disconnected send message to user2
+            targetID = room[0][0].user2;
+        }
+        else if (room[1][0]) {
+            //user2 disconnected send message to user1
+            targetID = room[1][0].user1;
+        }
+        if (targetID === null || targetID === '')
+            return;
+        wss.clients.forEach(client => {
+            let start = {
+                type: 'Error',
+                message: 'Player 2 disconnected',
+            };
+            if (client.uid === targetID) {
+                client.send(JSON.stringify(start));
+            }
+        });
     });
     socket.on('message', async function (message) {
         console.log('message recieved');

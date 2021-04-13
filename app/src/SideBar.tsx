@@ -37,10 +37,11 @@ const StyledSideBar = styled(SideBar)<toSideBar>`
 	top: 0px;
 	margin-top: 5%;
 	margin-left: 5%;
-	width: 80px;
-	height: 50px;
-	border-radius: 5px;
-	background: ${props => props.theme.colors.fgLIGHT};
+	width: 40px;
+	height: 40px;
+	border-radius: 3px;
+	background: ${props => props.theme.colors.bgDARK};
+	/* box-shadow: 0px 0px 0px 1px ${props => props.theme.colors.fgCOL}; */
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: flex-start;
@@ -58,12 +59,13 @@ const StyledSideBar = styled(SideBar)<toSideBar>`
 		transition-delay: 0ms;
 	}
 	& h3 {
+		color: white;
 		margin: 0px;
 		padding: 4px;
 		border-radius: 5px;
 	}
 	& h3:hover {
-		background: #c5d1dd;
+		background: ${props => props.theme.colors.bgLIGHT};
 	}
 
 	&:focus-within {
@@ -88,15 +90,15 @@ const StyledSideBar = styled(SideBar)<toSideBar>`
 	}
 
 	& a {
-		margin-top: 8px;
-		color: black;
-		width: 2rem;
-		height: 2rem;
+		margin-top: 6px;
+		color: ${props => props.theme.colors.fgLIGHT};
+		width: 1.7rem;
+		height: 1.7rem;
 		transition-duration: 250ms;
 		transition-delay: 250ms;
 	}
 	& svg {
-		font-size: 2rem;
+		font-size: 1.7rem;
 		transition-duration: 250ms;
 		transform-origin: center center;
 	}

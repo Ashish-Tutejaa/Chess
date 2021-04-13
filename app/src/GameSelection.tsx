@@ -26,6 +26,7 @@ const StyledController = styled('div')`
 	font-family: ${props => props.theme.font.main};
 	& h2 {
 		margin-top: 0px;
+		margin-bottom: 60px;
 	}
 	& > div {
 		display: flex;
@@ -33,13 +34,15 @@ const StyledController = styled('div')`
 		justify-content: space-around;
 		align-items: center;
 		width: 100%;
-		height: 30px;
-		margin-top: 30px;
+		height: 35px;
+		margin-top: 10px;
 	}
 	button,
 	select {
+		cursor: pointer;
 		height: 100%;
-		padding: 5px;
+		width: 130px;
+		padding: 2px 10px;
 		outline: none;
 		border: 0px;
 		border-radius: 3px;
@@ -79,7 +82,6 @@ export const GameSelection: (props: { socketRef: React.MutableRefObject<WebSocke
 	return (
 		<StyledController>
 			<h2>{label}</h2>
-			{/* <label htmlFor="time">Minutes</label> */}
 			<input value={time} onChange={e => setTime(parseInt(e.target.value))} name="time" type="range" min="1" max="45" />
 			<h3>
 				{time} Minute{time > 1 ? 's' : ''}
