@@ -6,12 +6,35 @@ const authRouter: Router = express.Router();
 //db
 import userModel from './models/user';
 
+authRouter.delete('/delete-user', async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		let user = req.cookies['uid'];
+		console.log(user, 'deleting');
+		if (!user) res.status(400).json({ err: 'No token found' });
+		else {
+			let resp = await userModel.findOneAndDelete({ username: user });
+			console.log(resp);
+			res.cookie('uid', '', {
+				httpOnly: true,
+				path: '/',
+				expires: new Date(1970, 0, 1, 0, 0),
+			});
+			res.status(200).json({ done: true });
+		}
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({ err });
+	}
+});
+
 authRouter.get('/get-user', async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		let user = req.cookies['uid'];
+		console.log(user);
 		if (!user) res.status(400).json({ err: 'No token found' });
 		else {
 			let resp = await userModel.findOne({ username: user });
+			console.log(resp);
 			res.status(200).json({ resp });
 		}
 	} catch (err) {
@@ -46,7 +69,7 @@ authRouter.post('/make-user', async (req: Request, res: Response, next: NextFunc
 		res.cookie('uid', username, {
 			httpOnly: true,
 			path: '/',
-			maxAge: 1 * 60 * 60 * 1000,
+			maxAge: 24 * 60 * 60 * 1000,
 		});
 		res.status(200).json({ op: true });
 	} catch (err) {

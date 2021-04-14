@@ -8,13 +8,37 @@ const express_1 = __importDefault(require("express"));
 const authRouter = express_1.default.Router();
 //db
 const user_1 = __importDefault(require("./models/user"));
+authRouter.delete('/delete-user', async (req, res, next) => {
+    try {
+        let user = req.cookies['uid'];
+        console.log(user, 'deleting');
+        if (!user)
+            res.status(400).json({ err: 'No token found' });
+        else {
+            let resp = await user_1.default.findOneAndDelete({ username: user });
+            console.log(resp);
+            res.cookie('uid', '', {
+                httpOnly: true,
+                path: '/',
+                expires: new Date(1970, 0, 1, 0, 0),
+            });
+            res.status(200).json({ done: true });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ err });
+    }
+});
 authRouter.get('/get-user', async (req, res, next) => {
     try {
         let user = req.cookies['uid'];
+        console.log(user);
         if (!user)
             res.status(400).json({ err: 'No token found' });
         else {
             let resp = await user_1.default.findOne({ username: user });
+            console.log(resp);
             res.status(200).json({ resp });
         }
     }
@@ -52,7 +76,7 @@ authRouter.post('/make-user', async (req, res, next) => {
         res.cookie('uid', username, {
             httpOnly: true,
             path: '/',
-            maxAge: 1 * 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
         });
         res.status(200).json({ op: true });
     }

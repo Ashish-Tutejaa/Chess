@@ -25,6 +25,11 @@ const roomSchema = new mongoose_1.default.Schema({
         type: String,
         required: true,
     },
+    createdAt: {
+        type: Date,
+        expires: 60 * 60 * 60,
+        default: Date.now,
+    },
 });
 const roomModel = mongoose_1.default.model('room', roomSchema);
 exports.default = roomModel;

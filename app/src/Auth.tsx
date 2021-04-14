@@ -58,32 +58,34 @@ const UserForm: (props: toUserForm) => JSX.Element = ({ redirect, className, use
 
 	const handleUserClick = async () => {
 		setLoad(1);
-		setTimeout(async () => {
-			if (inputRef.current) {
-				let len = inputRef.current.value.length;
-				if (len < 3) {
-					setErr({ timer: 5, title: `Username must be atleast 3 characters` });
-					setLoad(0);
-					return;
-				}
-			}
-
-			let avail = await checkUser();
-			console.log(avail);
-			if (avail) {
-				setErr({ timer: 5, title: `This Username is taken already!` });
+		if (inputRef.current) {
+			let len = inputRef.current.value.length;
+			if (len < 3) {
+				setErr({ timer: 5, title: `Username must be atleast 3 characters` });
+				setLoad(0);
+				return;
+			} else if (len > 15) {
+				setErr({ timer: 5, title: `Username must can be atmost 15 characters` });
 				setLoad(0);
 				return;
 			}
-			let made = await makeUser();
-			if (made !== true) {
-				setErr({ timer: 5, title: 'An internal server error occurred, please try again later.' });
-				setLoad(0);
-			} else {
-				userRef.current = (inputRef as any).current.value;
-				redirect(2);
-			}
-		}, 1000);
+		}
+
+		let avail = await checkUser();
+		console.log(avail);
+		if (avail) {
+			setErr({ timer: 5, title: `This Username is taken already!` });
+			setLoad(0);
+			return;
+		}
+		let made = await makeUser();
+		if (made !== true) {
+			setErr({ timer: 5, title: 'An internal server error occurred, please try again later.' });
+			setLoad(0);
+		} else {
+			userRef.current = (inputRef as any).current.value;
+			redirect(2);
+		}
 	};
 
 	return (
@@ -146,6 +148,18 @@ const StyledUserForm = styled(UserForm)<toUserForm>`
 	}
 `;
 
+const StyledWrapper = styled('div')`
+	height: 100%;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 3rem;
+	svg {
+		animation: ${rotate} 1000ms 0ms infinite normal ease-in-out forwards;
+	}
+`;
+
 interface toAuth {
 	children: JSX.Element | JSX.Element[] | null;
 }
@@ -173,7 +187,7 @@ const Auth: (props: toAuth) => JSX.Element = ({ children }) => {
 					timer: 5,
 				};
 				setStatus(1);
-			} else {
+			} else if (body.resp) {
 				userRef.current = body.resp.username;
 				setStatus(2);
 			}
@@ -183,9 +197,9 @@ const Auth: (props: toAuth) => JSX.Element = ({ children }) => {
 	let toRender: JSX.Element | null = null;
 	if (status === 0) {
 		toRender = (
-			<div>
+			<StyledWrapper>
 				<BiLoaderAlt />
-			</div>
+			</StyledWrapper>
 		);
 	} else if (status === 1) {
 		toRender = (

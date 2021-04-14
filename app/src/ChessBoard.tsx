@@ -52,6 +52,7 @@ interface toChessBoard {
 }
 
 export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, makeMove }) => {
+	console.log('board re-rendered');
 	const [board, setBoard] = useState<Array<Array<string>>>(initBoard);
 	const [turn, setTurn] = useState<string>('W');
 	const Refs = useAllRefs();
@@ -226,3 +227,5 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 		</div>
 	);
 };
+
+export const ChessBoardMemo = React.memo(ChessBoard);

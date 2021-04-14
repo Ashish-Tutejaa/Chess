@@ -1,7 +1,7 @@
 import Mongoose from 'mongoose';
 
 Mongoose.connect(
-	'mongodb://localhost:27017/chessUsers',
+	'mongodb+srv://tuteja:tuteja123@mern.1ft2r.mongodb.net/MERN?retryWrites=true&w=majority',
 	{
 		useNewUrlParser: true,
 		useUnifiedTopology: true,

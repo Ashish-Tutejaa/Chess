@@ -29,27 +29,42 @@ wss.on('connection', function (socket: WebSocket & { uid: string }, request) {
 
 	socket.on('close', async function () {
 		console.log('disconnected...', socket.uid);
-		let room = await Promise.all([roomModel.find({ user1: socket.uid }), roomModel.find({ user2: socket.uid })]);
-		console.log(room);
-		let targetID: string | null = null;
-		if (room[0][0]) {
-			//user1 disconnected send message to user2
-			targetID = room[0][0].user2;
-		} else if (room[1][0]) {
-			//user2 disconnected send message to user1
-			targetID = room[1][0].user1;
-		}
-
-		if (targetID === null || targetID === '') return;
-		wss.clients.forEach(client => {
-			let start: query = {
-				type: 'Error',
-				message: 'Player 2 disconnected',
-			};
-			if ((client as any).uid === targetID) {
-				client.send(JSON.stringify(start));
+		try {
+			let room = await Promise.all([roomModel.find({ user1: socket.uid }), roomModel.find({ user2: socket.uid })]);
+			console.log(room);
+			let targetID: string | null = null,
+				roomID: string | null = null;
+			if (room[0][0]) {
+				//user1 disconnected send message to user2
+				targetID = room[0][0].user2;
+				roomID = room[0][0].rid;
+			} else if (room[1][0]) {
+				//user2 disconnected send message to user1
+				targetID = room[1][0].user1;
+				roomID = room[1][0].rid;
 			}
-		});
+
+			if (targetID === null || targetID === '' || roomID === '' || roomID === null) return;
+			//room actually exists so tell client and delete room here
+
+			await roomModel.findOneAndDelete({ rid: roomID });
+
+			wss.clients.forEach(client => {
+				let start: query = {
+					type: 'Error',
+					message: 'Player 2 disconnected',
+				};
+				if ((client as any).uid === targetID) {
+					client.send(JSON.stringify(start));
+				}
+			});
+		} catch (err) {
+			let resp: query = {
+				type: 'Error',
+				message: 'An Error Occurred',
+			};
+			socket.send(JSON.stringify(resp));
+		}
 	});
 	socket.on('message', async function (message) {
 		console.log('message recieved');
@@ -87,8 +102,8 @@ wss.on('connection', function (socket: WebSocket & { uid: string }, request) {
 								type: 'Play',
 								message: 'Begin',
 							};
-							if ((val as any).uid === room.user1) start.message = room.side;
-							else start.message = room.side === 'Black' ? 'White' : 'Black';
+							if ((val as any).uid === room.user1) start.message = JSON.stringify({ time: room.time, side: room.side });
+							else start.message = JSON.stringify({ time: room.time, side: room.side === 'Black' ? 'White' : 'Black' });
 							val.send(JSON.stringify(start));
 						});
 					}
@@ -143,10 +158,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
-
-app.get('/', (req: Request, res: Response) => {
-	res.send('hi');
-});
 
 app.listen(PORT, () => {
 	console.log(`server running @ ${PORT}`);

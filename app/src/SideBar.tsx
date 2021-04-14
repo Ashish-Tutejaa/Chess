@@ -9,6 +9,21 @@ interface toSideBar {
 }
 
 const SideBar: (props: toSideBar) => JSX.Element = ({ remote, className, username }) => {
+	const handleLogout = () => {
+		console.log`logout`;
+		fetch('http://localhost:5000/api/auth/delete-user', {
+			method: 'DELETE',
+			credentials: 'include',
+		})
+			.then(res => {
+				window.location.pathname = '';
+			})
+			.catch(res => {
+				alert(res);
+				console.log(res);
+			});
+	};
+
 	return (
 		<>
 			<div className={className}>
@@ -23,6 +38,9 @@ const SideBar: (props: toSideBar) => JSX.Element = ({ remote, className, usernam
 				</div>
 				<div>
 					<h3 onMouseDown={() => remote(2)}>Join Challenge</h3>
+				</div>
+				<div>
+					<h3 onMouseDown={handleLogout}>Logout</h3>
 				</div>
 			</div>
 			<div className="overlay"></div>
@@ -71,7 +89,7 @@ const StyledSideBar = styled(SideBar)<toSideBar>`
 	&:focus-within {
 		transition-duration: 250ms;
 		transition-delay: 250ms;
-		height: 200px;
+		height: 240px;
 		width: 200px;
 	}
 

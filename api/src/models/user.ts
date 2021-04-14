@@ -12,6 +12,6 @@ const UserSchema = new Mongoose.Schema({
 	},
 });
 
-const userModel = Mongoose.model('user', UserSchema);
+const userModel = Mongoose.model('chessuser', UserSchema);
 
 export default userModel;

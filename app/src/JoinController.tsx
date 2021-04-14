@@ -2,13 +2,17 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { UserContext } from './Auth';
 import { Play } from './Play';
-import { StyledLoader } from './shared/Styles';
+import { StyledButton, StyledLoader } from './shared/Styles';
 import { StyledRetry } from './shared/Components';
 import Alert from './Alert';
 
 const StyledLoader1 = styled(StyledLoader)`
 	color: white;
 	font-size: 3rem;
+`;
+
+const StyledButton1 = styled(StyledButton)`
+	width: 100px;
 `;
 
 interface query {
@@ -20,8 +24,8 @@ interface query {
 }
 
 const StyledWrapper = styled.div`
-	width: fit-content;
-	height: fit-content;
+	height: 500px;
+	width: 500px;
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: center;
@@ -43,17 +47,6 @@ const StyledWrapper = styled.div`
 	h1 {
 		margin: 0px;
 	}
-
-	button {
-		padding: 5px;
-		font-size: 1rem;
-		outline: none;
-		border: 0px;
-		color: white;
-		border-radius: 3px;
-		box-shadow: 0px 0px 0px 1px ${props => props.theme.colors.fgLIGHT};
-		background: #202020;
-	}
 `;
 
 const JoinController = () => {
@@ -62,6 +55,7 @@ const JoinController = () => {
 	const [retry, setRetry] = useState<number>(0);
 	const [code, setCode] = useState<string>('');
 	const [side, setSide] = useState<'White' | 'Black' | null>(null);
+	const [time, setTime] = useState<number>(-1);
 	const socketRef = useRef<null | WebSocket>(null);
 	const [move, setMove] = useState<string | null>(null);
 	const user = useContext(UserContext);
@@ -76,6 +70,8 @@ const JoinController = () => {
 
 		socket.onclose = () => {
 			setStatus({ page: -2 });
+			setCode('');
+			setMove(null);
 		};
 
 		socket.onmessage = message => {
@@ -84,15 +80,23 @@ const JoinController = () => {
 			console.log(resp);
 			if (resp.type === 'Join') {
 			} else if (resp.type === 'Play') {
-				alert(resp.message);
-				if (resp.message && ['Black', 'White', null].includes(resp.message)) {
-					setSide(resp.message as any);
+				if (!resp.message) return;
+
+				let respbody = JSON.parse(resp.message);
+				if (['Black', 'White', null].includes(respbody.side)) {
+					setSide(respbody.side);
+					setTime(parseInt(respbody.time));
 				}
 				setStatus({ page: 1 });
 			} else if (resp.type === 'Error') {
 				if (resp.message?.includes('disconnected')) {
 					console.log(resp);
 					setErr({ timer: 5, title: 'Opponent Disconnected' });
+					setStatus({ page: 0 });
+					setCode('');
+					setMove(null);
+				} else if (resp.message) {
+					setErr({ timer: 5, title: resp.message });
 					setStatus({ page: 0 });
 				}
 			} else if (resp.type === 'Move') {
@@ -134,11 +138,11 @@ const JoinController = () => {
 			<React.Fragment>
 				<h1>Enter Game Code</h1>
 				<input value={code} onChange={e => setCode(e.target.value)} type="text" placeholder="code" />
-				<button onClick={joinRoom}>Join Game</button>
+				<StyledButton1 onClick={joinRoom}>Join Game</StyledButton1>
 			</React.Fragment>
 		);
 	} else if (status.page === 1) {
-		ToRender = () => <Play move={move} roomCode={code} socketRef={socketRef} side={side} />;
+		ToRender = () => <Play time={time} move={move} roomCode={code} socketRef={socketRef} side={side} />;
 	}
 
 	return (

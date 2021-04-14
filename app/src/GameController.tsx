@@ -22,8 +22,8 @@ interface query {
 }
 
 const StyledWrapper = styled.div`
-	width: 100%;
-	height: 100%;
+	height: 500px;
+	width: 500px;
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: center;
@@ -33,6 +33,9 @@ const StyledWrapper = styled.div`
 	& input {
 		width: 400px;
 	}
+	h1 {
+		margin: 0px;
+	}
 `;
 
 const GameController = () => {
@@ -41,6 +44,7 @@ const GameController = () => {
 	const [status, setStatus] = useState<{ page: number }>({ page: -1 });
 	const [gameId, setGameId] = useState<string>('');
 	const [side, setSide] = useState<'White' | 'Black' | null>(null);
+	const [time, setTime] = useState<number>(-1);
 	const socketRef = useRef<null | WebSocket>(null);
 	const [move, setMove] = useState<string | null>(null);
 	const [err, setErr] = useState<null | { timer: number; title: string }>(null);
@@ -51,6 +55,7 @@ const GameController = () => {
 
 		socket.onclose = () => {
 			setStatus({ page: -2 });
+			setMove(null);
 		};
 
 		socket.onopen = () => {
@@ -65,9 +70,12 @@ const GameController = () => {
 				setStatus({ page: 1 });
 				setGameId(resp.message as string);
 			} else if (resp.type === 'Play') {
-				alert(resp.message);
-				if (resp.message && ['Black', 'White', null].includes(resp.message)) {
-					setSide(resp.message as any);
+				if (!resp.message) return;
+
+				let respbody = JSON.parse(resp.message);
+				if (['Black', 'White', null].includes(respbody.side)) {
+					setSide(respbody.side);
+					setTime(parseInt(respbody.time));
 				}
 				setStatus({ page: 2 });
 			} else if (resp.type === 'Error') {
@@ -75,6 +83,10 @@ const GameController = () => {
 				if (resp.message?.includes('disconnected')) {
 					console.log(resp);
 					setErr({ timer: 5, title: 'Opponent Disconnected' });
+					setStatus({ page: 0 });
+					setMove(null);
+				} else if (resp.message) {
+					setErr({ timer: 5, title: resp.message });
 					setStatus({ page: 0 });
 				}
 			} else if (resp.type === 'Move') {
@@ -104,7 +116,7 @@ const GameController = () => {
 	} else if (status.page === 1) {
 		ToRender = () => <Lobby gameId={gameId} />;
 	} else {
-		ToRender = () => <Play move={move} roomCode={gameId} socketRef={socketRef} side={side} />;
+		ToRender = () => <Play time={time} move={move} roomCode={gameId} socketRef={socketRef} side={side} />;
 	}
 
 	return (
