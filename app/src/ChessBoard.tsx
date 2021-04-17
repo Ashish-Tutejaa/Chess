@@ -12,20 +12,44 @@ interface pos {
 
 type newMouseEventOnDiv = React.MouseEvent<HTMLDivElement, MouseEvent> & pos;
 
-const initBoard: Array<Array<string>> = [];
-make_array(8).forEach(ele => {
-	initBoard.push(make_array(8));
-});
-for (let i in Pieces) {
-	let [x, y] = Pieces[i].cur_coords();
-	initBoard[7 - y][x] = Pieces[i].name;
-}
+const makeBoard = (side: 'White' | 'Black' | null): Array<Array<string>> => {
+	const initBoard: Array<Array<string>> = [];
+	make_array(8).forEach(ele => {
+		initBoard.push(make_array(8));
+	});
+	for (let i in Pieces) {
+		let [x, y] = Pieces[i].cur_coords();
+		initBoard[7 - y][x] = Pieces[i].name;
+	}
+
+	if (side === 'White' || side === null) return initBoard;
+	else {
+		for (let i = 0; i < 8; i++) {
+			for (let j = 0; j < 4; j++) {
+				let t: string = '';
+				t = initBoard[j][i];
+				initBoard[j][i] = initBoard[7 - j][i];
+				initBoard[7 - j][i] = t;
+			}
+		}
+		for (let i = 0; i < 8; i++) {
+			for (let j = 0; j < 4; j++) {
+				let t: string = '';
+				t = initBoard[i][j];
+				initBoard[i][j] = initBoard[i][7 - j];
+				initBoard[i][7 - j] = t;
+			}
+		}
+		return initBoard;
+	}
+};
 
 const check4mate = async (
 	name: string,
 	board: Array<Array<string>>,
 	setBoard: React.Dispatch<React.SetStateAction<string[][]>>,
-	setTurn: React.Dispatch<React.SetStateAction<string>>
+	setTurn: React.Dispatch<React.SetStateAction<string>>,
+	side: 'White' | 'Black' | null
 ): Promise<boolean> => {
 	let before_move = get_mapping_helper(board, name);
 	if (before_move) {
@@ -33,7 +57,7 @@ const check4mate = async (
 	}
 	let res = stop_mate(side_finder(name), board);
 	if (!res) {
-		setBoard(initBoard);
+		setBoard(makeBoard(side));
 		for (let i in Pieces) {
 			if (i[0] === 'P') {
 				(Pieces[i] as any).first_move = true;
@@ -53,7 +77,7 @@ interface toChessBoard {
 
 export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, makeMove }) => {
 	console.log('board re-rendered');
-	const [board, setBoard] = useState<Array<Array<string>>>(initBoard);
+	const [board, setBoard] = useState<Array<Array<string>>>(makeBoard(side));
 	const [turn, setTurn] = useState<string>('W');
 	const Refs = useAllRefs();
 	const parentInfoRef = useRef<null | {
@@ -74,12 +98,12 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 
 	useEffect(() => {
 		(async () => {
-			let check_white = await check4mate('K1', board, setBoard, setTurn);
+			let check_white = await check4mate('K1', board, setBoard, setTurn, side);
 			if (check_white) {
 				alert('Checkmate.  Black wins.');
 				return;
 			}
-			let check_black = await check4mate('K2', board, setBoard, setTurn);
+			let check_black = await check4mate('K2', board, setBoard, setTurn, side);
 			if (check_black) {
 				alert('Checkmate.  White wins.');
 				return;
@@ -95,6 +119,7 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 
 				if (!list.includes('piece')) return;
 				const name = list[1];
+				console.log(name, Pieces[name], turn);
 				if (Pieces[name].side !== turn) return;
 				if (side !== null && side[0] !== turn) {
 					console.log('cancelling');
@@ -102,12 +127,13 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 				}
 
 				const targetRef = Refs[name];
+				console.log(targetRef);
 
 				if (targetRef.current !== null) {
 					targetRef.current.style.zIndex = '100';
 					targetRef.current.style.transform = `translateX(${e.clientX - 15 - e.childPosX}px) translateY(${e.clientY - 15 - e.childPosY}px)`;
 
-					let dropLocations = (Pieces[name] as any).finder(board, Number(e.loc[0]), Number(e.loc[1]));
+					let dropLocations = (Pieces[name] as any).finder(board, Number(e.loc[0]), Number(e.loc[1]), side === null);
 
 					let processed: string[] = dropLocations.reduce((acc: [], cur: number[][], i: number) => {
 						return [
@@ -117,6 +143,8 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 							}),
 						];
 					}, []);
+
+					console.log(processed, dropLocations);
 
 					clickedRef.current = true;
 					parentInfoRef.current = {
@@ -168,7 +196,7 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 						if (board[x][y][0] === 'K') {
 							if (board[x][y][1] === '1') alert('White wins');
 							else alert('Black wins');
-							setBoard(initBoard);
+							setBoard(makeBoard(side));
 							setTurn('W');
 							break drop_target;
 						}

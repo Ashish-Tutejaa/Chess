@@ -4,14 +4,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-mongoose_1.default.connect('mongodb+srv://tuteja:tuteja123@mern.1ft2r.mongodb.net/MERN?retryWrites=true&w=majority', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}, err => {
-    if (err) {
-        console.error(err);
-    }
-    else {
-        console.log('successfully connected to database');
-    }
-});
+if (process.env.MONGO_URI) {
+    mongoose_1.default.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    }, err => {
+        if (err) {
+            console.error(err);
+        }
+        else {
+            console.log('successfully connected to database');
+        }
+    });
+}
+else {
+    console.log('No URI found');
+}

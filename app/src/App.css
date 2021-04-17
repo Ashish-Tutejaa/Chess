@@ -80,3 +80,33 @@ td {
 	background: #abc;
 	width: fit-content;
 }
+
+.rotate {
+	transform: rotate(180deg);
+}
+
+@media (max-width: 640px) {
+	.board {
+		height: 75vw;
+		width: 75vw;
+	}
+
+	td {
+		display: table-cell;
+		height: 10%;
+		width: 10%;
+	}
+}
+
+@media (max-width: 460px) {
+	.board {
+		height: 90vw;
+		width: 90vw;
+	}
+
+	td {
+		display: table-cell;
+		height: 10%;
+		width: 10%;
+	}
+}

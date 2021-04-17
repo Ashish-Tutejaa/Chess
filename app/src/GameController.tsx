@@ -30,7 +30,7 @@ const StyledWrapper = styled.div`
 	align-items: center;
 	color: white;
 	font-family: ${props => props.theme.font.main};
-	& input {
+	& > input {
 		width: 400px;
 	}
 	h1 {
@@ -51,7 +51,7 @@ const GameController = () => {
 
 	useEffect(() => {
 		setStatus({ page: -1 });
-		const socket = new WebSocket('ws://localhost:8080');
+		const socket = new WebSocket('ws://localhost:5000');
 
 		socket.onclose = () => {
 			setStatus({ page: -2 });

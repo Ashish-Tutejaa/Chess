@@ -20,13 +20,13 @@ interface origin {
 	white_castle_right: boolean;
 	black_castle_left: boolean;
 	black_castle_right: boolean;
-	finder: (this: any, board: Array<Array<string>>, x: number, y: number) => (number[][] | null)[] | null;
+	finder: (this: any, board: Array<Array<string>>, x: number, y: number, optin?: boolean) => (number[][] | null)[] | null;
 }
 export interface chessPiece {
 	side: string;
 	name: string;
 	cur_coords: () => [number, number];
-	first_piece?: boolean;
+	first_move?: boolean;
 }
 
 export const check: (x: number, y: number, lx: number, ly: number) => true | false = (x, y, lx, ly) => {
@@ -189,7 +189,7 @@ const origin: origin = {
 	white_castle_right: false,
 	black_castle_left: false,
 	black_castle_right: false,
-	finder(board, x, y) {
+	finder(board, x, y, optin) {
 		let lx = board[0].length,
 			ly = board.length;
 		if (this.name[0] === 'R') {
@@ -205,9 +205,10 @@ const origin: origin = {
 		} else if (this.name[0] === 'P') {
 			let res = [];
 			let sign = -1;
-			if (this.side === 'B') sign += 2;
+			if (optin && this.side === 'B') sign += 2;
 
 			if (this.first_move === true) {
+				console.log(board);
 				if (check(x, y + 2 * sign, lx, ly) && board[y + 2 * sign][x].length === 0) {
 					res.push([x, y + 2 * sign]);
 				}

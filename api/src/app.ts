@@ -2,6 +2,9 @@ import express, { Request, Response, Application, NextFunction } from 'express';
 const app: Application = express();
 const PORT = 5000;
 
+//env
+require('dotenv').config();
+
 //uuid
 import { v4 as uuid } from 'uuid';
 
@@ -20,7 +23,10 @@ interface query {
 
 import WebSocket from 'ws';
 
-const wss = new WebSocket.Server({ host: 'localhost', port: 8080 });
+import http from 'http';
+const server = http.createServer(app);
+
+const wss = new WebSocket.Server({ server: server });
 
 wss.on('connection', function (socket: WebSocket & { uid: string }, request) {
 	console.log('connected...');

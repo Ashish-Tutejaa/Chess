@@ -23,7 +23,11 @@ const StyledController = styled('div')`
 	padding: 30px;
 	border-radius: 5px;
 	color: white;
+	width: 300px;
 	font-family: ${props => props.theme.font.main};
+	input {
+		width: 290px;
+	}
 	& h2 {
 		margin-top: 0px;
 		margin-bottom: 60px;
@@ -41,7 +45,7 @@ const StyledController = styled('div')`
 	select {
 		cursor: pointer;
 		height: 100%;
-		width: 130px;
+		width: 110px;
 		padding: 2px 10px;
 		outline: none;
 		border: 0px;
@@ -49,7 +53,14 @@ const StyledController = styled('div')`
 		background: #181818;
 		color: white;
 		box-shadow: 0px 0px 0px 1px ${props => props.theme.colors.fgLIGHT};
-		font-size: 1.1rem;
+		font-size: 1rem;
+	}
+
+	@media (max-width: 400px) {
+		& {
+			width: 295px;
+			padding: 5px;
+		}
 	}
 `;
 
@@ -92,7 +103,7 @@ export const GameSelection: (props: { socketRef: React.MutableRefObject<WebSocke
 					<option>Random</option>
 					<option>White</option>
 				</select>
-				<button onClick={makeRoom}>Create Game</button>
+				<button onClick={makeRoom}>Start</button>
 			</div>
 		</StyledController>
 	);

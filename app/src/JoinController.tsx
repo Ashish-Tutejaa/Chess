@@ -62,7 +62,7 @@ const JoinController = () => {
 
 	useEffect(() => {
 		setStatus({ page: -1 });
-		const socket = new WebSocket('ws://localhost:8080');
+		const socket = new WebSocket('ws://localhost:5000');
 
 		socket.onopen = () => {
 			setStatus({ page: 0 });

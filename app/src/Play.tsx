@@ -74,6 +74,12 @@ const StyledWrapper = styled('div')`
 		box-sizing: border-box;
 		padding: 10px 10px;
 	}
+
+	@media (max-width: 460px) {
+		& h1 {
+			display: none;
+		}
+	}
 `;
 
 export const Play: (props: toPlay) => JSX.Element | null = ({ time, move, roomCode, side, socketRef }) => {
@@ -95,6 +101,24 @@ export const Play: (props: toPlay) => JSX.Element | null = ({ time, move, roomCo
 			let mv = JSON.parse(move);
 			console.log(move);
 			console.log(mv.board);
+
+			for (let i = 0; i < 8; i++) {
+				for (let j = 0; j < 4; j++) {
+					let t: string = '';
+					t = mv.board[j][i];
+					mv.board[j][i] = mv.board[7 - j][i];
+					mv.board[7 - j][i] = t;
+				}
+			}
+			for (let i = 0; i < 8; i++) {
+				for (let j = 0; j < 4; j++) {
+					let t: string = '';
+					t = mv.board[i][j];
+					mv.board[i][j] = mv.board[i][7 - j];
+					mv.board[i][7 - j] = t;
+				}
+			}
+
 			return mv.board;
 		} else return null;
 	}, [move]);
@@ -117,7 +141,7 @@ export const Play: (props: toPlay) => JSX.Element | null = ({ time, move, roomCo
 		<StyledWrapper>
 			<h1>Playing as {side}</h1>
 			<ChessBoardMemo move={board} makeMove={makeMove} side={turn}></ChessBoardMemo>
-			<div>
+			<div className={turn === 'White' ? '' : 'rotate'}>
 				<span>{curTurn === 'W' ? <BsCircle /> : <BsCircleFill />}</span>
 				<span>{curTurn === 'W' ? <BsCircleFill /> : <BsCircle />}</span>
 			</div>

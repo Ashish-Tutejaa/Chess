@@ -6,13 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app = express_1.default();
 const PORT = 5000;
+//env
+require('dotenv').config();
 //uuid
 const uuid_1 = require("uuid");
 //db init
 require("./models");
 const room_1 = __importDefault(require("./models/room"));
 const ws_1 = __importDefault(require("ws"));
-const wss = new ws_1.default.Server({ host: 'localhost', port: 8080 });
+const http_1 = __importDefault(require("http"));
+const server = http_1.default.createServer(app);
+const wss = new ws_1.default.Server({ server: server });
 wss.on('connection', function (socket, request) {
     console.log('connected...');
     socket.uid = uuid_1.v4();

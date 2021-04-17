@@ -1,16 +1,20 @@
 import Mongoose from 'mongoose';
 
-Mongoose.connect(
-	'mongodb+srv://tuteja:tuteja123@mern.1ft2r.mongodb.net/MERN?retryWrites=true&w=majority',
-	{
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	},
-	err => {
-		if (err) {
-			console.error(err);
-		} else {
-			console.log('successfully connected to database');
+if (process.env.MONGO_URI) {
+	Mongoose.connect(
+		process.env.MONGO_URI,
+		{
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		},
+		err => {
+			if (err) {
+				console.error(err);
+			} else {
+				console.log('successfully connected to database');
+			}
 		}
-	}
-);
+	);
+} else {
+	console.log('No URI found');
+}

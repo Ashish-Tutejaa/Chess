@@ -130,6 +130,7 @@ const StyledUserForm = styled(UserForm)<toUserForm>`
 	& h1 {
 		margin-top: 10%;
 		margin-bottom: 50px;
+		text-align: center;
 	}
 	& input {
 		width: 250px;
