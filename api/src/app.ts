@@ -1,6 +1,6 @@
 import express, { Request, Response, Application, NextFunction } from 'express';
 const app: Application = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 //env
 require('dotenv').config();
