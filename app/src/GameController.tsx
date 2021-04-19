@@ -51,7 +51,7 @@ const GameController = () => {
 
 	useEffect(() => {
 		setStatus({ page: -1 });
-		const socket = new WebSocket('ws://localhost:5000');
+		const socket = new WebSocket('ws://localhost:8080');
 
 		socket.onclose = () => {
 			setStatus({ page: -2 });
