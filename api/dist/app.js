@@ -16,7 +16,7 @@ const room_1 = __importDefault(require("./models/room"));
 const ws_1 = __importDefault(require("ws"));
 const http_1 = __importDefault(require("http"));
 const server = http_1.default.createServer(app);
-const wss = new ws_1.default.Server({ server: server });
+const wss = new ws_1.default.Server({ host: 'localhost', port: 8080 });
 wss.on('connection', function (socket, request) {
     console.log('connected...');
     socket.uid = uuid_1.v4();

@@ -26,7 +26,7 @@ import WebSocket from 'ws';
 import http from 'http';
 const server = http.createServer(app);
 
-const wss = new WebSocket.Server({ server: server });
+const wss = new WebSocket.Server({ host: 'localhost', port: 8080 });
 
 wss.on('connection', function (socket: WebSocket & { uid: string }, request) {
 	console.log('connected...');

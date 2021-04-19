@@ -55,7 +55,8 @@ const check4mate = async (
 	if (before_move) {
 		return false;
 	}
-	let res = stop_mate(side_finder(name), board);
+	let res = stop_mate(side_finder(name), board, side);
+	console.log(res);
 	if (!res) {
 		setBoard(makeBoard(side));
 		for (let i in Pieces) {
@@ -98,12 +99,15 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 
 	useEffect(() => {
 		(async () => {
+			console.log('use effecting...');
 			let check_white = await check4mate('K1', board, setBoard, setTurn, side);
+			console.log(check_white);
 			if (check_white) {
 				alert('Checkmate.  Black wins.');
 				return;
 			}
 			let check_black = await check4mate('K2', board, setBoard, setTurn, side);
+			console.log(check_black);
 			if (check_black) {
 				alert('Checkmate.  White wins.');
 				return;
@@ -119,7 +123,7 @@ export const ChessBoard: (props: toChessBoard) => JSX.Element = ({ move, side, m
 
 				if (!list.includes('piece')) return;
 				const name = list[1];
-				console.log(name, Pieces[name], turn);
+				// console.log(name, Pieces[name], turn);
 				if (Pieces[name].side !== turn) return;
 				if (side !== null && side[0] !== turn) {
 					console.log('cancelling');

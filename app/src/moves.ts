@@ -103,22 +103,28 @@ const gen_direc = (direction: number[][], board: Array<Array<string>>, x0: numbe
 	return res;
 };
 
-export const stop_mate = (side: string, board: Array<Array<string>>): true | false => {
+export const stop_mate = (side: string, board: Array<Array<string>>, optin: 'White' | 'Black' | null): true | false => {
 	for (let [i, vali] of board.entries()) {
 		for (let [j, valj] of vali.entries()) {
 			if (valj.length === 0) continue;
 			let s = side_finder(valj);
 			if (side !== s) continue;
-			let directions = (Pieces[valj] as any).finder(board, j, i);
+			let directions = (Pieces[valj] as any).finder(board, j, i, optin !== 'Black');
 			//check to see if there is atleast one legal move
 			let res = directions.some((direc: number[][]) => {
 				return direc.some(([f, s]: number[]) => {
 					let temp = JSON.parse(JSON.stringify(board));
 					temp[s][f] = valj;
 					temp[i][j] = '';
-					return get_mapping_helper(temp, valj);
+					let moved = get_mapping_helper(temp, valj);
+					if (moved) {
+						console.table(temp);
+					}
+					return moved;
 				});
 			});
+
+			console.log(res);
 
 			if (res) return true;
 		}
@@ -208,7 +214,7 @@ const origin: origin = {
 			if (optin && this.side === 'B') sign += 2;
 
 			if (this.first_move === true) {
-				console.log(board);
+				console.table(board);
 				if (check(x, y + 2 * sign, lx, ly) && board[y + 2 * sign][x].length === 0) {
 					res.push([x, y + 2 * sign]);
 				}
